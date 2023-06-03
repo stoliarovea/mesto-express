@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const User = require('../models/user');
 
 const getAllUsers = (req, res) => {
@@ -11,6 +12,9 @@ const getUserById = (req, res) => {
     .orFail(() => { throw new Error('NotFound'); })
     .then(user => res.send(user))
     .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return res.status(400).send({ message: 'Not Found' });
+      }
       if (err.message === 'NotFound') {
         return res.status(404).send({ message: 'Not Found' });
       }

@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const Card = require('../models/card');
 
 const getAllCards = (req, res) => {
@@ -26,6 +27,9 @@ const deleteCard = (req, res) => {
     .orFail(() => { throw new Error('NotFound'); })
     .then(card => res.send(card))
     .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return res.status(400).send({ message: 'Not Found' });
+      }
       if (err.message === 'NotFound') {
         return res.status(404).send({ message: 'Not Found' });
       }
@@ -44,8 +48,8 @@ const likeCard = (req, res) => {
     .orFail(() => { throw new Error('NotFound'); })
     .then(card => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
+      if (err instanceof mongoose.Error.CastError) {
+        return res.status(400).send({ message: 'Not Found' });
       }
       if (err.message === 'NotFound') {
         return res.status(404).send({ message: 'Not Found' });
@@ -65,8 +69,8 @@ const dislikeCard = (req, res) => {
     .orFail(() => { throw new Error('NotFound'); })
     .then(card => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
+      if (err instanceof mongoose.Error.CastError) {
+        return res.status(400).send({ message: 'Not Found' });
       }
       if (err.message === 'NotFound') {
         return res.status(404).send({ message: 'Not Found' });
