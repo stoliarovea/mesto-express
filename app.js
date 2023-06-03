@@ -32,6 +32,10 @@ app.use(users);
 
 app.use(cards);
 
+app.use((req, res) => {
+  res.status(404).send({ message: "Page not found" })
+});
+
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)
 });
