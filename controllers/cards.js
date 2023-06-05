@@ -1,10 +1,16 @@
 const { default: mongoose } = require('mongoose');
 const Card = require('../models/card');
 
+STATUS_CODES = {
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500
+}
+
 const getAllCards = (req, res) => {
   Card.find({})
     .then(cards => res.send(cards))
-    .catch(err => res.status(500).send({ message: err }));
+    .catch(err => res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err }));
 };
 
 const createCard = (req, res) => {
@@ -14,11 +20,9 @@ const createCard = (req, res) => {
     .then(card => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
       }
-      else {
-        return res.status(500).send({ message: err });
-      }
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
     });
 };
 
@@ -28,14 +32,12 @@ const deleteCard = (req, res) => {
     .then(card => res.send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return res.status(400).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid ID' });
       }
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
       }
-      else {
-        return res.status(500).send({ message: err });
-      }
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
     });
 };
 
@@ -49,14 +51,12 @@ const likeCard = (req, res) => {
     .then(card => res.send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return res.status(400).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid ID' });
       }
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
       }
-      else {
-        return res.status(500).send({ message: err });
-      }
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
     });
 };
 
@@ -70,14 +70,12 @@ const dislikeCard = (req, res) => {
     .then(card => res.send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return res.status(400).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid ID' });
       }
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
       }
-      else {
-        return res.status(500).send({ message: err });
-      }
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
     });
 };
 

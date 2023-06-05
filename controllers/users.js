@@ -1,10 +1,16 @@
 const { default: mongoose } = require('mongoose');
 const User = require('../models/user');
 
+STATUS_CODES = {
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500
+}
+
 const getAllUsers = (req, res) => {
   User.find({})
     .then(users => res.send(users))
-    .catch(err => res.status(500).send({ message: err }));
+    .catch(err => res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err }));
 };
 
 const getUserById = (req, res) => {
@@ -13,14 +19,12 @@ const getUserById = (req, res) => {
     .then(user => res.send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return res.status(400).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid ID' });
       }
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
       }
-      else {
-        return res.status(500).send({ message: err });
-      }
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
     });
 };
 
@@ -30,11 +34,9 @@ const createUser = (req, res) => {
     .then(user => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
       }
-      else {
-        return res.status(500).send({ message: err });
-      }
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
     });
 };
 
@@ -49,14 +51,12 @@ const editUser = (req, res) => {
     .then(user => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
       }
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
       }
-      else {
-        return res.status(500).send({ message: err });
-      }
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
     });
 };
 
@@ -71,14 +71,12 @@ const editAvatar = (req, res) => {
     .then(user => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: `${Object.values(err.errors).map(e => e.message).join(', ')}` });
       }
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Not Found' });
+        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
       }
-      else {
-        return res.status(500).send({ message: err });
-      }
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
     });
 };
 
