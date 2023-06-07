@@ -17,14 +17,20 @@
   "plugins": [
     "react"
   ],
-  "rules": {},
+  "rules": {
+    "no-underscore-dangle": [
+      "error",
+      {
+        "allow": [
+          "foo_",
+          "_bar"
+        ]
+      }
+    ]
+  },
   "settings": {
     "react": {
       "version": "detect"
     }
-  },
-  "allow": [
-    "foo_",
-    "_bar"
-  ]
+  }
 }
