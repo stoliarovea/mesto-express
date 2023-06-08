@@ -22,8 +22,7 @@
       "error",
       {
         "allow": [
-          "foo_",
-          "_bar"
+          "_id"
         ]
       }
     ]
