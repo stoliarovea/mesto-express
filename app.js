@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '647b26d2fc4d7d8d3f374fc2'
+    _id: '647b26d2fc4d7d8d3f374fc2',
   };
 
   next();
@@ -33,9 +33,9 @@ app.use(users);
 app.use(cards);
 
 app.use((req, res) => {
-  res.status(404).send({ message: "Page not found" })
+  res.status(404).send({ message: 'Page not found' });
 });
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`)
+  console.log(`App listening on port ${PORT}`);
 });
