@@ -6,7 +6,6 @@
   },
   "extends": [
     "eslint:recommended",
-    "plugin:react/recommended",
     "airbnb-base"
   ],
   "overrides": [],
@@ -14,9 +13,7 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "react"
-  ],
+  "plugins": [],
   "rules": {
     "no-console": "off",
     "linebreak-style": 0,
@@ -29,9 +26,5 @@
       }
     ]
   },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  }
+  "settings": {}
 }
