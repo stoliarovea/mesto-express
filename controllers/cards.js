@@ -14,8 +14,7 @@ const getAllCards = (req, res) => {
 };
 
 const createCard = (req, res) => {
-  const owner = req.user._id;
-  const { name, link } = req.body;
+  const { name, link, owner } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
     .catch((err) => {
