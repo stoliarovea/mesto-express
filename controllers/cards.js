@@ -1,6 +1,7 @@
 const { default: mongoose } = require('mongoose');
 const Card = require('../models/card');
 const NotFoundError = require('../errors/not-found-error');
+const Forbidden = require('../errors/forbidden');
 
 const getAllCards = (req, res, next) => {
   Card.find({})
