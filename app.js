@@ -40,7 +40,7 @@ app.post('/signin', celebrate({
   }),
 }), login);
 
-//app.use(auth);
+app.use(auth);
 
 app.use(users);
 app.use(cards);
