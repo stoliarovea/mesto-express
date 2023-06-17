@@ -1,81 +1,58 @@
 const { default: mongoose } = require('mongoose');
 const Card = require('../models/card');
+const NotFoundError = require('../errors/not-found-error');
 
-const STATUS_CODES = {
-  BAD_REQUEST: 400,
-  NOT_FOUND: 404,
-  INTERNAL_SERVER_ERROR: 500,
-};
-
-const getAllCards = (req, res) => {
+const getAllCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch((err) => res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err }));
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link, owner } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: `${Object.values(err.errors).map((e) => e.message).join(', ')}` });
-      }
-      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
-    });
+    .catch(next);
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .orFail(() => { throw new Error('NotFound'); })
-    .then((card) => res.send(card))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid ID' });
+    .orFail(() => {
+      throw new NotFoundError('Not found');
+    })
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Not found');
       }
-      if (err.message === 'NotFound') {
-        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
-      }
-      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
-    });
+      res.send(card);
+    })
+    .catch(next);
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(() => { throw new Error('NotFound'); })
+    .orFail(() => {
+      throw new NotFoundError('Not found');
+    })
     .then((card) => res.send(card))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid ID' });
-      }
-      if (err.message === 'NotFound') {
-        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
-      }
-      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
-    });
+    .catch(next);
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(() => { throw new Error('NotFound'); })
+    .orFail(() => {
+      throw new NotFoundError('Not found');
+    })
     .then((card) => res.send(card))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid ID' });
-      }
-      if (err.message === 'NotFound') {
-        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
-      }
-      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
-    });
+    .catch(next);
 };
 
 module.exports = {

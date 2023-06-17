@@ -3,112 +3,107 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const BadRequest = require('../errors/bad-request');
+const Unauthorized = require('../errors/unauthorized');
+const NotFoundError = require('../errors/not-found-error');
 
-const STATUS_CODES = {
-  BAD_REQUEST: 400,
-  NOT_FOUND: 404,
-  INTERNAL_SERVER_ERROR: 500,
-};
-
-const getAllUsers = (req, res) => {
+const getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err }));
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail(() => { throw new Error('NotFound'); })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid ID' });
+    .orFail(() => {
+      throw new NotFoundError('Not found');
+    })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Not found');
       }
-      if (err.message === 'NotFound') {
-        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
-      }
-      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
-    });
+      res.send(user);
+    })
+    .catch(next);
 };
 
-const getUserInfo = (req, res) => {
+const getUserInfo = (req, res, next) => {
   const { user } = req.body;
   User.findOne({ user })
     .then((data) => res.send(data))
-    .catch((err) => res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err }));
+    .catch(next);
 };
 
-const createUser = (req, res) => {
-  const { email, password, name, about, avatar } = req.body;
+const createUser = (req, res, next) => {
+  const {
+    email, password, name, about, avatar,
+  } = req.body;
   if (validator.isEmail(email)) {
     bcrypt.hash(password, 10)
-      .then((hash) => User.create({ email, password: hash, name, about, avatar }))
-      .then((user) => res.send(user))
-      .catch((err) => {
-        if (err.name === 'ValidationError') {
-          return res.status(STATUS_CODES.BAD_REQUEST).send({ message: `${Object.values(err.errors).map((e) => e.message).join(', ')}` });
-        }
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
-      });
+      .then((hash) => User.create({
+        email, password: hash, name, about, avatar,
+      }))
+      .then((user) => {
+        res.send(user);
+      })
+      .catch(next);
   } else {
-    return res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Invalid Email' });
+    throw new BadRequest('Invalid email');
   }
 };
 
-const editUser = (req, res) => {
+const editUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
     { new: true, runValidators: true, upsert: false },
   )
-    .orFail(() => { throw new Error('NotFound'); })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: `${Object.values(err.errors).map((e) => e.message).join(', ')}` });
+    .orFail(() => {
+      throw new NotFoundError('Not found');
+    })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Not found');
       }
-      if (err.message === 'NotFound') {
-        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
-      }
-      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
-    });
+      res.send(user);
+    })
+    .catch(next);
 };
 
-const editAvatar = (req, res) => {
+const editAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
     { new: true, runValidators: true, upsert: false },
   )
-    .orFail(() => { throw new Error('NotFound'); })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(STATUS_CODES.BAD_REQUEST).send({ message: `${Object.values(err.errors).map((e) => e.message).join(', ')}` });
+    .orFail(() => {
+      throw new NotFoundError('Not found');
+    })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Not found');
       }
-      if (err.message === 'NotFound') {
-        return res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Not Found' });
-      }
-      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({ message: err });
-    });
+      res.send(user);
+    })
+    .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   let user;
   User.findOne({ email }).select('+password')
     .then((userData) => {
       if (!userData) {
-        return Promise.reject(new Error('Incorrect email or password'));
+        return Promise.reject(new Unauthorized('Incorrect email or password'));
       }
       user = userData._id;
       return bcrypt.compare(password, userData.password);
     })
     .then((matched) => {
       if (!matched) {
-        return Promise.reject(new Error('Incorrect email or password'));
+        return Promise.reject(new Unauthorized('Incorrect email or password'));
       }
       const token = jwt.sign(
         { _id: user },
@@ -117,9 +112,7 @@ const login = (req, res) => {
       );
       return res.send({ token });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };
 
 module.exports = {
