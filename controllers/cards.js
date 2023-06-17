@@ -5,7 +5,12 @@ const Forbidden = require('../errors/forbidden');
 
 const getAllCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send(cards))
+    .then((cards) => {
+      if (!cards) {
+        throw new NotFoundError('Not found');
+      }
+      res.send(cards);
+    })
     .catch(next);
 };
 
@@ -24,6 +29,9 @@ const deleteCard = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Not found');
+      }
+      if (req.user._id !== card.owner) {
+        throw new Forbidden('Forbidden');
       }
       res.send(card);
     })
