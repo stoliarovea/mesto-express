@@ -28,16 +28,15 @@ const getUserById = (req, res, next) => {
 };
 
 const getUserInfo = (req, res, next) => {
-  const { user } = req.user;
-  User.find({ user })
+  User.findById(req.user._id)
     .orFail(() => {
       throw new NotFoundError('Not found');
     })
-    .then((userData) => {
-      if (!userData) {
+    .then((user) => {
+      if (!user) {
         throw new NotFoundError('Not found');
       }
-      res.send(userData);
+      res.send(user);
     })
     .catch(next);
 };
