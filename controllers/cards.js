@@ -54,7 +54,13 @@ const likeCard = (req, res, next) => {
       throw new NotFoundError('Not found');
     })
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'NotFound') {
+        next(new NotFoundError('Not found'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const dislikeCard = (req, res, next) => {
@@ -67,7 +73,13 @@ const dislikeCard = (req, res, next) => {
       throw new NotFoundError('Not found');
     })
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'NotFound') {
+        next(new NotFoundError('Not found'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports = {
