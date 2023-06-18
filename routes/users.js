@@ -25,6 +25,10 @@ users.patch('/users/me', celebrate({
   }),
 }), editUser);
 
-users.patch('/users/me/avatar', editAvatar);
+users.patch('/users/me/avatar', celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().uri().pattern(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/),
+  }),
+}), editAvatar);
 
 module.exports = users;

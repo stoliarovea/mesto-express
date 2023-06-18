@@ -11,7 +11,13 @@ const getAllCards = (req, res, next) => {
       }
       res.send(cards);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'NotFound') {
+        next(new NotFoundError('Not found'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const createCard = (req, res, next) => {
