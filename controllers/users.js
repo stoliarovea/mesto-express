@@ -1,4 +1,3 @@
-const { default: mongoose } = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -30,7 +29,7 @@ const getUserById = (req, res, next) => {
 
 const getUserInfo = (req, res, next) => {
   const { user } = req.user;
-  User.findOne({ user })
+  User.find({ user })
     .orFail(() => {
       throw new NotFoundError('Not found');
     })
