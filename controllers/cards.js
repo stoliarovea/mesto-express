@@ -21,14 +21,17 @@ const getAllCards = (req, res, next) => {
 };
 
 const createCard = (req, res, next) => {
-  const { name, link, owner } = req.body;
-  Card.create({ name, link, owner })
+  Card.create({
+    name: req.body.name,
+    link: req.body.link,
+    owner: req.user._id,
+  })
     .then((card) => res.send(card))
     .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .orFail(() => {
       throw new NotFoundError('Not found');
     })
@@ -36,10 +39,20 @@ const deleteCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Not found');
       }
-      if (req.user._id !== card.owner) {
+      if (req.user._id !== card.owner.toString()) {
         throw new Forbidden('Forbidden');
       }
-      res.send(card);
+      Card.findByIdAndRemove(req.params.cardId)
+        .orFail(() => {
+          throw new NotFoundError('Not found');
+        })
+        .then((deletedCard) => {
+          if (!deletedCard) {
+            throw new NotFoundError('Not found');
+          }
+          res.send(deletedCard);
+        })
+        .catch(next);
     })
     .catch(next);
 };

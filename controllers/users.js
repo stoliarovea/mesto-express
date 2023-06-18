@@ -29,7 +29,7 @@ const getUserById = (req, res, next) => {
 };
 
 const getUserInfo = (req, res, next) => {
-  const { user } = req.body;
+  const { user } = req.user;
   User.findOne({ user })
     .then((data) => res.send(data))
     .catch(next);
