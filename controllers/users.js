@@ -31,7 +31,12 @@ const getUserById = (req, res, next) => {
 const getUserInfo = (req, res, next) => {
   const { user } = req.body;
   User.findOne({ user })
-    .then((data) => res.send(data))
+    .then((data) => {
+      if (!data) {
+        throw new NotFoundError('Not found');
+      }
+      res.send(data);
+    })
     .catch(next);
 };
 
