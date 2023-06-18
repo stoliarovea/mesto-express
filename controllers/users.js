@@ -6,6 +6,7 @@ const User = require('../models/user');
 const BadRequest = require('../errors/bad-request');
 const Unauthorized = require('../errors/unauthorized');
 const NotFoundError = require('../errors/not-found-error');
+const Conflict = require('../errors/conflict');
 
 const getAllUsers = (req, res, next) => {
   User.find({})
@@ -38,18 +39,26 @@ const createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
-  if (validator.isEmail(email)) {
-    bcrypt.hash(password, 10)
-      .then((hash) => User.create({
-        email, password: hash, name, about, avatar,
-      }))
-      .then((user) => {
-        res.send(user);
-      })
-      .catch(next);
-  } else {
+  if (!validator.isEmail(email)) {
     throw new BadRequest('Invalid email');
   }
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      email, password: hash, name, about, avatar,
+    }))
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new Conflict('Email already registered'));
+      }
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Invalid data'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const editUser = (req, res, next) => {
