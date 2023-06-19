@@ -19,9 +19,6 @@ const getUserById = (req, res, next) => {
       throw new NotFoundError('Not found');
     })
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Not found');
-      }
       res.send(user);
     })
     .catch(next);
@@ -78,9 +75,6 @@ const editUser = (req, res, next) => {
       throw new NotFoundError('Not found');
     })
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Not found');
-      }
       res.send(user);
     })
     .catch(next);
@@ -97,9 +91,6 @@ const editAvatar = (req, res, next) => {
       throw new NotFoundError('Not found');
     })
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Not found');
-      }
       res.send(user);
     })
     .catch(next);

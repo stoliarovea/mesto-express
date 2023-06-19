@@ -1,4 +1,3 @@
-const { default: mongoose } = require('mongoose');
 const Card = require('../models/card');
 const NotFoundError = require('../errors/not-found-error');
 const Forbidden = require('../errors/forbidden');
@@ -6,9 +5,6 @@ const Forbidden = require('../errors/forbidden');
 const getAllCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
-      if (!cards) {
-        throw new NotFoundError('Not found');
-      }
       res.send(cards);
     })
     .catch((err) => {
@@ -36,9 +32,6 @@ const deleteCard = (req, res, next) => {
       throw new NotFoundError('Not found');
     })
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Not found');
-      }
       if (req.user._id !== card.owner.toString()) {
         throw new Forbidden('Forbidden');
       }
@@ -47,9 +40,6 @@ const deleteCard = (req, res, next) => {
           throw new NotFoundError('Not found');
         })
         .then((deletedCard) => {
-          if (!deletedCard) {
-            throw new NotFoundError('Not found');
-          }
           res.send(deletedCard);
         })
         .catch(next);
@@ -68,11 +58,7 @@ const likeCard = (req, res, next) => {
     })
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'NotFound') {
-        next(new NotFoundError('Not found'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 
@@ -87,11 +73,7 @@ const dislikeCard = (req, res, next) => {
     })
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'NotFound') {
-        next(new NotFoundError('Not found'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 
