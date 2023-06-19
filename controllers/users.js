@@ -1,4 +1,3 @@
-const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -42,9 +41,6 @@ const createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
-  if (!validator.isEmail(email)) {
-    throw new BadRequest('Invalid email');
-  }
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       email, password: hash, name, about, avatar,
@@ -77,7 +73,13 @@ const editUser = (req, res, next) => {
     .then((user) => {
       res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Invalid data'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const editAvatar = (req, res, next) => {
@@ -93,7 +95,13 @@ const editAvatar = (req, res, next) => {
     .then((user) => {
       res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Invalid data'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const login = (req, res, next) => {

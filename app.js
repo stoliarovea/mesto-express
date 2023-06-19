@@ -7,6 +7,7 @@ const users = require('./routes/users');
 const cards = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/not-found-error');
 
 const { PORT = 3000 } = process.env;
 
@@ -45,8 +46,8 @@ app.use(auth);
 app.use(users);
 app.use(cards);
 
-app.use((req, res) => {
-  res.status(404).send({ message: 'Page not found' });
+app.use((req, res, next) => {
+  next(new NotFoundError('Page not found'));
 });
 
 app.use(errors());

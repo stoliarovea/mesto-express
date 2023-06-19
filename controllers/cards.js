@@ -1,6 +1,7 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/not-found-error');
 const Forbidden = require('../errors/forbidden');
+const BadRequest = require('../errors/bad-request');
 
 const getAllCards = (req, res, next) => {
   Card.find({})
@@ -23,7 +24,13 @@ const createCard = (req, res, next) => {
     owner: req.user._id,
   })
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Invalid data'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const deleteCard = (req, res, next) => {
