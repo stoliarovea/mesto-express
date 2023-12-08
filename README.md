@@ -17,4 +17,4 @@
 
 ## Cсылка на репозиторий
 
-https://github.com/stoliarovea/express-mesto-gha
+Mesto (Backend) https://github.com/stoliarovea/express-mesto-gha
